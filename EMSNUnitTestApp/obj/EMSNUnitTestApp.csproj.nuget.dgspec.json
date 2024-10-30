@@ -1,23 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "J:\\EMSNUnitTestApp\\EMSNUnitTestApp\\EMSNUnitTestApp.csproj": {}
+    "J:\\GitHub\\EMSNUnitTestApp\\EMSNUnitTestApp\\EMSNUnitTestApp.csproj": {}
   },
   "projects": {
-    "J:\\EMSNUnitTestApp\\EMSNUnitTestApp\\EMSNUnitTestApp.csproj": {
+    "J:\\GitHub\\EMSNUnitTestApp\\EMSNUnitTestApp\\EMSNUnitTestApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "J:\\EMSNUnitTestApp\\EMSNUnitTestApp\\EMSNUnitTestApp.csproj",
+        "projectUniqueName": "J:\\GitHub\\EMSNUnitTestApp\\EMSNUnitTestApp\\EMSNUnitTestApp.csproj",
         "projectName": "EMSNUnitTestApp",
-        "projectPath": "J:\\EMSNUnitTestApp\\EMSNUnitTestApp\\EMSNUnitTestApp.csproj",
-        "packagesPath": "C:\\Users\\smartwiresatm\\.nuget\\packages\\",
-        "outputPath": "J:\\EMSNUnitTestApp\\EMSNUnitTestApp\\obj\\",
+        "projectPath": "J:\\GitHub\\EMSNUnitTestApp\\EMSNUnitTestApp\\EMSNUnitTestApp.csproj",
+        "packagesPath": "C:\\Users\\muhammad.haroon\\.nuget\\packages\\",
+        "outputPath": "J:\\GitHub\\EMSNUnitTestApp\\EMSNUnitTestApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\smartwiresatm\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\muhammad.haroon\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -25,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -64,6 +66,10 @@
               "target": "Package",
               "version": "[4.6.0, )"
             },
+            "NunitXml.TestLogger": {
+              "target": "Package",
+              "version": "[4.1.0, )"
+            },
             "System.IO.Ports": {
               "target": "Package",
               "version": "[8.0.0, )"
@@ -96,7 +102,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
