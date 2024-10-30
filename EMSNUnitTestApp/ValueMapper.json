@@ -1,0 +1,158 @@
+[
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "Line Current",
+    "Board": "iDCE",
+    "DataPoints": {
+      "99": 99.0,
+      "100": 100.0,
+      "310": 310.0,
+      "50": 50.0,
+      "300": 300.0,
+      "180": 180.0,
+      "170": 170.0,
+      "190": 170.0,
+      "200": 200.0,
+      "40": 40.0,
+      "850": 850.0,
+      "851": 851.0,
+      "809": 809.0,
+      "801": 801.0,
+      "800": 800.0,
+	  "4320": 4320.0,
+      "799": 799.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "VSL Current",
+    "Board": "iDCE",
+    "DataPoints": {
+      "100": 100.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "SV Current",
+    "Board": "iDCE",
+    "DataPoints": {
+      "100": 100.0,
+      "200": 200.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "SCR Voltage",
+    "Board": "iDCE",
+    "DataPoints": {
+      "100": 100.0,
+      "200": 200.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "SCR Current",
+    "Board": "iDCE",
+    "DataPoints": {
+      "100": 100.0,
+      "200": 200.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "VSL Voltage",
+    "Board": "iDCE",
+    "DataPoints": {
+      "100": 100.0,
+      "200": 200.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "Line Current",
+    "Board": "iSVC",
+    "DataPoints": {
+      "100": 70.0,
+      "200": 168.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "Wall 1 Current",
+    "Board": "iSVC",
+    "DataPoints": {
+      "100": 100.0,
+      "200": 200.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "Wall 2 Current",
+    "Board": "iSVC",
+    "DataPoints": {
+      "100": 100.0,
+      "200": 200.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "Primary Voltage",
+    "Board": "iSVC",
+    "DataPoints": {
+      "100": 100.0,
+      "200": 201.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "IGBT Temperature",
+    "Board": "iSVC",
+    "DataPoints": {
+      "100": 100.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "Dc LinkVoltage 1",
+    "Board": "iSVC",
+    "DataPoints": {
+      "100": 100.0,
+      "200": 200.0
+    }
+  },
+  {
+    "Client": "iSeries",
+    "BoardRev": "A",
+    "FirmWareVersion": "0.01",
+    "Channel": "Dc LinkVoltage 2",
+    "Board": "iSVC",
+    "DataPoints": {
+      "100": 100.0,
+      "200": 200.0
+    }
+  }
+]

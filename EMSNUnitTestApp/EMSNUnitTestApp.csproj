@@ -1,0 +1,86 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.WindowsDesktop.App" />
+		<PackageReference Include="coverlet.collector" Version="6.0.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+		<PackageReference Include="NUnit" Version="4.2.2" />
+		<PackageReference Include="NUnit.Analyzers" Version="3.9.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+		<PackageReference Include="System.IO.Ports" Version="8.0.0" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="EMSASE2000AutomateAPI">
+		  <HintPath>..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\EMSASE2000AutomateAPI.dll</HintPath>
+		</Reference>
+		<Reference Include="EMScommonsLibrary">
+			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\EMScommonsLibrary.dll</HintPath>
+		</Reference>
+		<Reference Include="GPIOAPI">
+			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\GPIOAPI.dll</HintPath>
+		</Reference>
+		<Reference Include="NativeDesktopAutomationAPI">
+			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\NativeDesktopAutomationAPI.dll</HintPath>
+		</Reference>
+		<Reference Include="ReturnStatus">
+			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\ReturnStatus.dll</HintPath>
+		</Reference>
+		<Reference Include="SensorSimulatorAPI">
+			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\SensorSimulatorAPI.dll</HintPath>
+		</Reference>
+		<Reference Include="SICommonLibrary">
+			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\SICommonLibrary.dll</HintPath>
+		</Reference>
+		<Reference Include="SWAT.Utilities">
+			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\SWAT.Utilities.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="NUnit.Framework" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="EMSMappingDataDNP3.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="EMSProfileDataDNP3.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="DNP3Emulator.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="DNP3EmulatorApp.exe">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="iiDCE Sensors Data.xlsx">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="iiSC Sensors Data.xlsx">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Newtonsoft.Json.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="ValueMapper.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="DNP3Configuration\" />
+	</ItemGroup>
+
+</Project>
