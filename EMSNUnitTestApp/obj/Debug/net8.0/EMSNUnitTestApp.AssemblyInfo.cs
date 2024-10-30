@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EMSNUnitTestApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1d78816727d930367bad57a21b83ff66d7aa8131")]
 [assembly: System.Reflection.AssemblyProductAttribute("EMSNUnitTestApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EMSNUnitTestApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
