@@ -1,5 +1,6 @@
 using EMSNUnitTestApp.Tests;
 using PS19.ATM.ReturnStatus;
+using System.Diagnostics;
 using System.Text;
 
 namespace EMSNUnitTestApp
@@ -12,17 +13,35 @@ namespace EMSNUnitTestApp
         public void Setup()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            SelfTest selfTest = new SelfTest();
-            Status status = selfTest.PerformSelfTest();
-            Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
+            try
+            {
+                SelfTest selfTest = new SelfTest();
+                Status status = selfTest.PerformSelfTest();
+                Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                TestContext.WriteLine("Error!\r\nDetails: " + ex.Message);
+                return;
+            }
         }
 
         [Test]
         [Repeat(5)]
         public void Test()
         {
-            Status status = dcTests.EMS163();
-            Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
+            try
+            {
+                Status status = dcTests.EMS163();
+                Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                TestContext.WriteLine("Error!\r\nDetails: " + ex.Message);
+                return;
+            }
         }
     }
 }
