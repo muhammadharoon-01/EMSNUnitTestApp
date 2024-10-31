@@ -23,65 +23,68 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="EMSASE2000AutomateAPI">
-		  <HintPath>..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\EMSASE2000AutomateAPI.dll</HintPath>
-		</Reference>
-		<Reference Include="EMScommonsLibrary">
-			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\EMScommonsLibrary.dll</HintPath>
-		</Reference>
-		<Reference Include="GPIOAPI">
-			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\GPIOAPI.dll</HintPath>
-		</Reference>
-		<Reference Include="NativeDesktopAutomationAPI">
-			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\NativeDesktopAutomationAPI.dll</HintPath>
-		</Reference>
-		<Reference Include="ReturnStatus">
-			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\ReturnStatus.dll</HintPath>
-		</Reference>
-		<Reference Include="SensorSimulatorAPI">
-			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\SensorSimulatorAPI.dll</HintPath>
-		</Reference>
-		<Reference Include="SICommonLibrary">
-			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\SICommonLibrary.dll</HintPath>
-		</Reference>
-		<Reference Include="SWAT.Utilities">
-			<HintPath>..\..\..\SW-E2E\01-ATM Repository\Code Workspace\Working\SWAT.Utilities.dll</HintPath>
-		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<Using Include="NUnit.Framework" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="EMSMappingDataDNP3.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="EMSProfileDataDNP3.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="DNP3Emulator.dll">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="DNP3EmulatorApp.exe">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="iiDCE Sensors Data.xlsx">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="iiSC Sensors Data.xlsx">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Newtonsoft.Json.dll">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	  <None Update="ValueMapper.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
+		<None Update="Dependencies\NationalInstruments.DAQmx.dll">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="EMSMappingDataDNP3.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="EMSProfileDataDNP3.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="DNP3Emulator.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="DNP3EmulatorApp.exe">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="iiDCE Sensors Data.xlsx">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="iiSC Sensors Data.xlsx">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="ValueMapper.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="DNP3Configuration\" />
+		<Folder Include="DNP3Configuration\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="EMSASE2000AutomateAPI">
+	    <HintPath>Dependencies\EMSASE2000AutomateAPI.dll</HintPath>
+	  </Reference>
+	  <Reference Include="EMScommonsLibrary">
+	    <HintPath>Dependencies\EMScommonsLibrary.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Fault Data Recorder">
+	    <HintPath>Dependencies\Fault Data Recorder.dll</HintPath>
+	  </Reference>
+	  <Reference Include="GPIOAPI">
+	    <HintPath>Dependencies\GPIOAPI.dll</HintPath>
+	  </Reference>
+	  <Reference Include="NativeDesktopAutomationAPI">
+	    <HintPath>Dependencies\NativeDesktopAutomationAPI.dll</HintPath>
+	  </Reference>
+	  <Reference Include="ReturnStatus">
+	    <HintPath>Dependencies\ReturnStatus.dll</HintPath>
+	  </Reference>
+	  <Reference Include="SensorSimulatorAPI">
+	    <HintPath>Dependencies\SensorSimulatorAPI.dll</HintPath>
+	  </Reference>
+	  <Reference Include="SICommonLibrary">
+	    <HintPath>Dependencies\SICommonLibrary.dll</HintPath>
+	  </Reference>
+	  <Reference Include="SWAT.Utilities">
+	    <HintPath>Dependencies\SWAT.Utilities.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>
