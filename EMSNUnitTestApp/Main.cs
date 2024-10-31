@@ -5,6 +5,7 @@ using System.Text;
 
 namespace EMSNUnitTestApp
 {
+    [TestFixture]
     public class Main
     {
         DeviceCommandsTests dcTests = new DeviceCommandsTests();
@@ -18,6 +19,7 @@ namespace EMSNUnitTestApp
                 SelfTest selfTest = new SelfTest();
                 Status status = selfTest.PerformSelfTest();
                 Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
+                if (status.ErrorOccurred) { return; }
             }
             catch (Exception ex)
             {

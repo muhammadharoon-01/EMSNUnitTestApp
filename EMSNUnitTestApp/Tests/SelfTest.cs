@@ -20,32 +20,19 @@ namespace EMSNUnitTestApp.Tests
             try
             {
                 status = InitializeSensorSimulatorAndGPIO();
-                if (status.ErrorOccurred)
-                {
-                    TestContext.WriteLine("Error!\r\nDetails: " + status.ReturnedMessage);
-                    return status;
-                }
+                if (status.ErrorOccurred){ return status; }
                 Thread.Sleep(1000);
 
                 status = DNP3EmulatorConfiguration();
-                if (status.ErrorOccurred)
-                {
-                    TestContext.WriteLine("Error!\r\nDetails: " + status.ReturnedMessage);
-                    return status;
-                }
+                if (status.ErrorOccurred) { return status; }
                 Thread.Sleep(1000);
 
                 status = DNP3EmulatorSelfTest();
-                if (status.ErrorOccurred)
-                {
-                    TestContext.WriteLine("Error!\r\nDetails: " + status.ReturnedMessage);
-                    return status;
-                }
+                if (status.ErrorOccurred) { return status; }
                 Thread.Sleep(1000);
             }
             catch (Exception ex)
             {
-                TestContext.WriteLine("Error!\r\nDetails: " + status.ReturnedMessage);
                 Debug.WriteLine(ex.ToString());
                 return status;
             }
