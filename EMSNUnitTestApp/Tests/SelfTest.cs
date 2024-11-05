@@ -47,8 +47,8 @@ namespace EMSNUnitTestApp.Tests
                 TestContext.WriteLine("Configure DNP3 Emulator.");
 
                 CommonModel.EMSCommonsV104.ase2000Obj = new ASE2000API();
-                CommonModel.EMSCommonsV104.ase2000Obj.gatewayIP = "172.19.17.28";
-                CommonModel.EMSCommonsV104.ase2000Obj.redundantGatewayIP = "172.19.17.90";
+                CommonModel.EMSCommonsV104.ase2000Obj.gatewayIP = "172.19.17.91";
+                CommonModel.EMSCommonsV104.ase2000Obj.redundantGatewayIP = "172.19.17.31";
                 CommonModel.EMSCommonsV104.ase2000Obj.subClient = "V104";
 
                 ASE2000API.currentGatewayIP = CommonModel.EMSCommonsV104.ase2000Obj.gatewayIP;
