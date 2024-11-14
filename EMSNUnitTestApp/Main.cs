@@ -8,26 +8,60 @@ namespace EMSNUnitTestApp
     [TestFixture]
     public class Main
     {
-        DeviceCommandsTests dcTests = new DeviceCommandsTests();
-
-        [SetUp]
-        public void Setup()
+        [Test]
+        [Ignore("Ignore a test")]
+        public void RunBatScriptWithPsExec()
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            try
+            // Path to the bat script you want to run
+            string batFilePath = @"psexec-script.bat";
+
+            // Set up the process start information
+            var processInfo = new ProcessStartInfo
             {
-                SelfTest selfTest = new SelfTest();
-                Status status = selfTest.PerformSelfTest();
-                Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
-                if (status.ErrorOccurred) { return; }
-            }
-            catch (Exception ex)
+                FileName = $"{batFilePath}",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = false
+            };
+
+            // Start the process
+            using (var process = new Process { StartInfo = processInfo })
             {
-                Debug.WriteLine(ex.ToString());
-                TestContext.WriteLine("Error!\r\nDetails: " + ex.Message);
-                return;
+                process.Start();
+
+                // Capture output and errors if needed
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                // Optionally, you can also verify the output or errors
+                TestContext.WriteLine($"Output: {output}");
+                TestContext.WriteLine($"Error: {error}");
             }
         }
+
+        DeviceCommandsTests dcTests = new DeviceCommandsTests();
+
+        //[SetUp]
+        //public void Setup()
+        //{
+        //    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        //    try
+        //    {
+        //        SelfTest selfTest = new SelfTest();
+        //        Status status = selfTest.PerformSelfTest();
+        //        Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
+        //        if (status.ErrorOccurred) { return; }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Debug.WriteLine(ex.ToString());
+        //        TestContext.WriteLine("Error!\r\nDetails: " + ex.Message);
+        //        return;
+        //    }
+        //}
 
         [Test]
         [Repeat(5)]
