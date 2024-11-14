@@ -9,7 +9,7 @@ namespace EMSNUnitTestApp
     public class Main
     {
         [Test]
-        [Ignore("Ignore a test")]
+        //[Ignore("Ignore a test")]
         public void RunBatScriptWithPsExec()
         {
             // Path to the bat script you want to run
