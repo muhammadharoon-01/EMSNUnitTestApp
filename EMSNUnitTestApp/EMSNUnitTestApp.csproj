@@ -11,6 +11,28 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="DNP3Emulator.dll" />
+	  <None Remove="DNP3EmulatorApp.exe" />
+	  <None Remove="psexec-script.bat" />
+	  <None Remove="PsExec.exe" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="DNP3Emulator.dll">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="DNP3EmulatorApp.exe">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="psexec-script.bat">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="PsExec.exe">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 		<FrameworkReference Include="Microsoft.WindowsDesktop.App" />
 		<PackageReference Include="coverlet.collector" Version="6.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
@@ -35,12 +57,6 @@
 		</None>
 		<None Update="EMSProfileDataDNP3.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="DNP3Emulator.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="DNP3EmulatorApp.exe">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="iiDCE Sensors Data.xlsx">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
