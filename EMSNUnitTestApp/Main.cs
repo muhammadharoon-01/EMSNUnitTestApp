@@ -10,6 +10,8 @@ namespace EMSNUnitTestApp
     {
         private const string MapName = "TestCommunication";
         private const string MutexName = "Global\\TestCommunicationMutex";
+        private const string ReadyEventName = "Global\\ClientReadyEvent";
+        private const string TestCasesReadEventName = "Global\\TestCasesReadEvent";
         private const int BufferSize = 4096;
 
         [Test]
@@ -51,14 +53,25 @@ namespace EMSNUnitTestApp
         {
             using (var mmf = MemoryMappedFile.CreateOrOpen(MapName, BufferSize))
             using (var mutex = new Mutex(false, MutexName))
+            using (var readyEvent = new EventWaitHandle(false, EventResetMode.ManualReset, ReadyEventName))
+            using (var testCasesReadEvent = new EventWaitHandle(false, EventResetMode.ManualReset, TestCasesReadEventName))
             {
-                Console.WriteLine("Server started and waiting for client response...");
+                Console.WriteLine("Server started and waiting for client connection...");
+
+                // Wait for the client to signal readiness
+                readyEvent.WaitOne();
+                Console.WriteLine("Client connected.");
 
                 try
                 {
                     // Step 1: Send the list of test cases to the client
-                    string[] testCaseNames = { "EMS116", "EMS117" };
+                    string[] testCaseNames = { "EMS116" };
                     SendTestCaseNames(mmf, mutex, testCaseNames);
+
+                    // Wait for the client to confirm reading the test cases
+                    Console.WriteLine("Waiting for the client to acknowledge test cases...");
+                    testCasesReadEvent.WaitOne();
+                    Console.WriteLine("Client acknowledged test cases.");
 
                     // Step 2: Continuously receive results from the client
                     ReceiveStepResults(mmf, mutex);
