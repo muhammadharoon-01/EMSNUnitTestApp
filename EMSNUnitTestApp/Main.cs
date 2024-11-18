@@ -15,7 +15,7 @@ namespace EMSNUnitTestApp
         private const int BufferSize = 4096;
 
         [Test]
-        //[Ignore("Ignore a test")]
+        [Ignore("Ignore a test")]
         public void RunBatScriptWithPsExec()
         {
             // Path to the bat script you want to run
@@ -57,7 +57,7 @@ namespace EMSNUnitTestApp
             using (var testCasesReadEvent = new EventWaitHandle(false, EventResetMode.ManualReset, TestCasesReadEventName))
             {
                 Console.WriteLine("Server started and waiting for client connection...");
-
+                RunBatScriptWithPsExec();
                 // Wait for the client to signal readiness
                 readyEvent.WaitOne();
                 Console.WriteLine("Client connected.");
