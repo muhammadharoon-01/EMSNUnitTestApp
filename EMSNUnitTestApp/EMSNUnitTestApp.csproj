@@ -19,6 +19,7 @@
 	<ItemGroup>
 	  <None Remove="DNP3Emulator.dll" />
 	  <None Remove="DNP3EmulatorApp.exe" />
+	  <None Remove="EMSApplication.exe" />
 	  <None Remove="psexec-script.bat" />
 	  <None Remove="PsExec.exe" />
 	</ItemGroup>
@@ -28,6 +29,9 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="DNP3EmulatorApp.exe">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="EMSApplication.exe">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="psexec-script.bat">
@@ -41,12 +45,12 @@
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.WindowsDesktop.App" />
 		<PackageReference Include="coverlet.collector" Version="6.0.0" />
-		<PackageReference Include="linq2db.SQLite" Version="5.4.1" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
 		<PackageReference Include="NUnit" Version="4.2.2" />
 		<PackageReference Include="NUnit.Analyzers" Version="3.9.0" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
 		<PackageReference Include="NunitXml.TestLogger" Version="4.1.0" />
+		<PackageReference Include="System.Data.SQLite" Version="1.0.119" />
 		<PackageReference Include="System.IO.Ports" Version="8.0.0" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
 	</ItemGroup>
@@ -56,8 +60,33 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="Dependencies\NationalInstruments.DAQmx.dll">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		<None Update="Dependencies\EntityFramework.SqlServer.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>EntityFramework.SqlServer.dll</Link>
+		</None>
+		<None Update="Dependencies\EntityFramework.SqlServer.xml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>EntityFramework.SqlServer.xml</Link>
+		</None>
+		<None Update="Dependencies\System.Data.SQLite.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>System.Data.SQLite.dll</Link>
+		</None>
+		<None Update="Dependencies\System.Data.SQLite.Linq.dlll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>System.Data.SQLite.Linq.dll</Link>
+		</None>
+		<None Update="Dependencies\System.Data.SQLite.xml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>System.Data.SQLite.xml</Link>
+		</None>
+		<None Update="Dependencies\System.Data.SQLite.EF6.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>System.Data.SQLite.EF6.dll</Link>
+		</None>
+		<None Update="Dependencies\SQLite.Interop.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>SQLite.Interop.dll</Link>
 		</None>
 		<None Update="EMSMappingDataDNP3.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>

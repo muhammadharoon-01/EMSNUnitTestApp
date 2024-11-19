@@ -15,8 +15,8 @@ namespace EMSNUnitTestApp
         private const string TestCasesReadEventName = "Global\\TestCasesReadEvent";
         private const int BufferSize = 4096;
 
-        private const string DatabaseFile = "C:\\Users\\muhammad.haroon\\JenkinsEMSTestDB.sqlite";
-        string ConnectionString = "Data Source=C:\\Users\\muhammad.haroon\\JenkinsEMSTestDB.sqlite;Version=3;";
+        private const string DatabaseFile = "JenkinsEMSTestDB.sqlite";
+        string ConnectionString = "Data Source=JenkinsEMSTestDB.sqlite;Version=3;";
 
         [Test]
         public void CreateDBAndTables()
@@ -27,7 +27,11 @@ namespace EMSNUnitTestApp
             // Step 2: Create the tables
             CreateTables();
 
+            // Step3: Populate the test case names in database
             PopulateTestCases();
+
+            // Step4: Run the EMS Application to execute the test cases
+            RunBatScriptWithPsExec();
         }
 
         private static void CreateDatabaseFile()
