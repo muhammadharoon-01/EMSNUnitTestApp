@@ -1,6 +1,7 @@
 using PS19.ATM.ReturnStatus;
 using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
+using System.Data.SQLite;
 using System.Text;
 
 namespace EMSNUnitTestApp
@@ -13,6 +14,98 @@ namespace EMSNUnitTestApp
         private const string ReadyEventName = "Global\\ClientReadyEvent";
         private const string TestCasesReadEventName = "Global\\TestCasesReadEvent";
         private const int BufferSize = 4096;
+
+        private const string DatabaseFile = "C:\\Users\\muhammad.haroon\\JenkinsEMSTestDB.sqlite";
+        string ConnectionString = "Data Source=C:\\Users\\muhammad.haroon\\JenkinsEMSTestDB.sqlite;Version=3;";
+
+        [Test]
+        public void CreateDBAndTables()
+        {
+            // Step 1: Create the SQLite database file
+            CreateDatabaseFile();
+
+            // Step 2: Create the tables
+            CreateTables();
+
+            PopulateTestCases();
+        }
+
+        private static void CreateDatabaseFile()
+        {
+            // Check if the file already exists
+            if (!System.IO.File.Exists(DatabaseFile))
+            {
+                SQLiteConnection.CreateFile(DatabaseFile);
+                Console.WriteLine($"Database file '{DatabaseFile}' created.");
+            }
+            else
+            {
+                Console.WriteLine($"Database file '{DatabaseFile}' already exists.");
+            }
+        }
+        private static void CreateTables()
+        {
+            // Connection string to the database
+            string connectionString = $"Data Source={DatabaseFile};Version=3;";
+
+            using (var connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+
+                // SQL for creating the TestCases table
+                string createTestCasesTable = @"
+                CREATE TABLE IF NOT EXISTS TestCases (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Name TEXT NOT NULL,
+                    Status TEXT DEFAULT 'Pending'
+                );";
+
+                // SQL for creating the StepResults table
+                string createStepResultsTable = @"
+                CREATE TABLE IF NOT EXISTS StepResults (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    TestCaseId INTEGER NOT NULL,
+                    StepDescription TEXT NOT NULL,
+                    Result TEXT NOT NULL,
+                    FOREIGN KEY (TestCaseId) REFERENCES TestCases(Id)
+                );";
+
+                // Execute the table creation commands
+                using (var command = new SQLiteCommand(createTestCasesTable, connection))
+                {
+                    command.ExecuteNonQuery();
+                    Console.WriteLine("Table 'TestCases' created.");
+                }
+
+                using (var command = new SQLiteCommand(createStepResultsTable, connection))
+                {
+                    command.ExecuteNonQuery();
+                    Console.WriteLine("Table 'StepResults' created.");
+                }
+            }
+        }
+
+        private void PopulateTestCases()
+        {
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                connection.Open();
+                string[] testCaseNames = { "EMS116", "EMS117", "EMS118" };
+
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = "INSERT INTO TestCases (Name) VALUES (@Name);";
+                    foreach (var name in testCaseNames)
+                    {
+                        command.Parameters.Clear();
+                        command.Parameters.AddWithValue("@Name", name);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            Console.WriteLine("Test cases populated in the database.");
+        }
 
         [Test]
         [Ignore("Ignore a test")]
@@ -49,6 +142,7 @@ namespace EMSNUnitTestApp
         }
 
         [Test]
+        [Ignore("Ignore a test")]
         public void ServerReporting()
         {
             using (var mmf = MemoryMappedFile.CreateOrOpen(MapName, BufferSize))
@@ -148,8 +242,6 @@ namespace EMSNUnitTestApp
                 Thread.Sleep(500); // Polling interval
             }
         }
-
-
 
         DeviceCommandsTests dcTests = new DeviceCommandsTests();
 

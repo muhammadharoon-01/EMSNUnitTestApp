@@ -11,6 +11,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="DNP3Configuration\**" />
+	  <EmbeddedResource Remove="DNP3Configuration\**" />
+	  <None Remove="DNP3Configuration\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Remove="DNP3Emulator.dll" />
 	  <None Remove="DNP3EmulatorApp.exe" />
 	  <None Remove="psexec-script.bat" />
@@ -35,6 +41,7 @@
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.WindowsDesktop.App" />
 		<PackageReference Include="coverlet.collector" Version="6.0.0" />
+		<PackageReference Include="linq2db.SQLite" Version="5.4.1" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
 		<PackageReference Include="NUnit" Version="4.2.2" />
 		<PackageReference Include="NUnit.Analyzers" Version="3.9.0" />
@@ -67,10 +74,6 @@
 		<None Update="ValueMapper.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="DNP3Configuration\" />
 	</ItemGroup>
 
 	<ItemGroup>
