@@ -20,6 +20,9 @@
 	  <None Remove="DNP3Emulator.dll" />
 	  <None Remove="DNP3EmulatorApp.exe" />
 	  <None Remove="EMSApplication.exe" />
+	  <None Remove="EMSReports\ATM_EMS_Test_Report_Template-v103.xlsx" />
+	  <None Remove="EMSReports\ATM_EMS_Test_Report_Template-v104.xlsx" />
+	  <None Remove="EMSReports\EMSConfigurationDetails.ini" />
 	  <None Remove="psexec-script.bat" />
 	  <None Remove="PsExec.exe" />
 	</ItemGroup>
@@ -32,6 +35,15 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="EMSApplication.exe">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="EMSReports\ATM_EMS_Test_Report_Template-v103.xlsx">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="EMSReports\ATM_EMS_Test_Report_Template-v104.xlsx">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="EMSReports\EMSConfigurationDetails.ini">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="psexec-script.bat">
