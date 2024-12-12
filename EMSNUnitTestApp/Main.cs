@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Data.SQLite;
 using System.Text;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace EMSNUnitTestApp
 {
@@ -33,6 +34,9 @@ namespace EMSNUnitTestApp
 
             // Step4: Run the EMS Application to execute the test cases
             RunBatScriptWithPsExec();
+
+            // Step5: Poll Database after every 5 seconds to get updated step results.
+            ServerReporting();
         }
 
         //[Test]
@@ -68,7 +72,6 @@ namespace EMSNUnitTestApp
                 TestContext.WriteLine($"Error: {error}");
             }
         }
-
         private static void CreateDatabaseFile()
         {
             // Check if the file already exists
@@ -103,7 +106,7 @@ namespace EMSNUnitTestApp
                 string createStepResultsTable = @"
                 CREATE TABLE IF NOT EXISTS StepResults (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    TestCaseId INTEGER NOT NULL,
+                    TestCaseId TEXT NOT NULL,
                     StepDescription TEXT NOT NULL,
                     Result TEXT NOT NULL,
                     FOREIGN KEY (TestCaseId) REFERENCES TestCases(Id)
@@ -123,7 +126,6 @@ namespace EMSNUnitTestApp
                 }
             }
         }
-
         private void PopulateTestCases()
         {
             using (var connection = new SQLiteConnection(ConnectionString))
@@ -147,106 +149,56 @@ namespace EMSNUnitTestApp
         }
 
         [Test]
-        [Ignore("Ignore a test")]
+        //[Ignore("Ignore a test")]
         public void ServerReporting()
         {
-            using (var mmf = MemoryMappedFile.CreateOrOpen(MapName, BufferSize))
-            using (var mutex = new Mutex(false, MutexName))
-            using (var readyEvent = new EventWaitHandle(false, EventResetMode.ManualReset, ReadyEventName))
-            using (var testCasesReadEvent = new EventWaitHandle(false, EventResetMode.ManualReset, TestCasesReadEventName))
-            {
-                Console.WriteLine("Server started and waiting for client connection...");
-                RunBatScriptWithPsExec();
-                // Wait for the client to signal readiness
-                readyEvent.WaitOne();
-                Console.WriteLine("Client connected.");
-
-                try
-                {
-                    // Step 1: Send the list of test cases to the client
-                    string[] testCaseNames = { "EMS116" };
-                    SendTestCaseNames(mmf, mutex, testCaseNames);
-
-                    // Wait for the client to confirm reading the test cases
-                    Console.WriteLine("Waiting for the client to acknowledge test cases...");
-                    testCasesReadEvent.WaitOne();
-                    Console.WriteLine("Client acknowledged test cases.");
-
-                    // Step 2: Continuously receive results from the client
-                    ReceiveStepResults(mmf, mutex);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Server error: {ex.Message}");
-                }
-            }
-        }
-
-        private void SendTestCaseNames(MemoryMappedFile mmf, Mutex mutex, string[] testCaseNames)
-        {
-            mutex.WaitOne();
             try
             {
-                using (var accessor = mmf.CreateViewAccessor())
-                {
-                    // Convert the test case list to a single string
-                    string testCaseList = string.Join(",", testCaseNames);
-
-                    // Write the data length and data
-                    byte[] data = Encoding.UTF8.GetBytes(testCaseList);
-                    accessor.Write(0, data.Length);
-                    accessor.WriteArray(4, data, 0, data.Length);
-
-                    Console.WriteLine("Test case list sent to client.");
-                }
+                //Continuously receive results from the client
+                PollStepResults();
             }
-            finally
+            catch (Exception ex)
             {
-                mutex.ReleaseMutex();
+                Console.WriteLine($"Server error: {ex.Message}");
             }
         }
 
-        private void ReceiveStepResults(MemoryMappedFile mmf, Mutex mutex)
+        private void PollStepResults()
         {
-            while (true)
+            try
             {
-                mutex.WaitOne();
-                try
+                using (var connection = new SQLiteConnection(ConnectionString))
                 {
-                    using (var accessor = mmf.CreateViewAccessor())
+                    connection.Open();
+                    while (true)
                     {
-                        // Read the data length
-                        int length = accessor.ReadInt32(0);
-                        if (length > 0)
+                        using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
                         {
-                            // Read the step result
-                            byte[] buffer = new byte[length];
-                            accessor.ReadArray(4, buffer, 0, length);
-                            string stepResult = Encoding.UTF8.GetString(buffer);
-
-                            // Log the step result
-                            Console.WriteLine($"Step Result: {stepResult}");
-
-                            // Clear the shared memory
-                            accessor.Write(0, 0);
-
-                            // Break if the client indicates test completion
-                            if (stepResult == "All Tests Completed")
+                            using (var reader = command.ExecuteReader())
                             {
-                                Console.WriteLine("All test results received. Exiting server...");
-                                break;
+                                while (reader.Read())
+                                {
+                                    int id = reader.GetInt32(0);
+                                    int testCaseId = reader.GetInt32(1);
+                                    string stepDescription = reader.GetString(2);
+                                    string result = reader.GetString(3);
+
+                                    Console.WriteLine($"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
+                                }
                             }
                         }
+
+                        Thread.Sleep(5000); // Poll every second
                     }
                 }
-                finally
-                {
-                    mutex.ReleaseMutex();
-                }
+            }
+            catch (Exception ex)
+            {
 
-                Thread.Sleep(500); // Polling interval
+                throw;
             }
         }
+
 
         DeviceCommandsTests dcTests = new DeviceCommandsTests();
 
