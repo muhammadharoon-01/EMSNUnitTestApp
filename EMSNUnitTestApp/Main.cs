@@ -221,22 +221,22 @@ namespace EMSNUnitTestApp
         //    }
         //}
 
-        [Test]
-        [Ignore("Ignore a test")]
-        [Repeat(5)]
-        public void Test()
-        {
-            try
-            {
-                Status status = dcTests.EMS163();
-                Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-                TestContext.WriteLine("Error!\r\nDetails: " + ex.Message);
-                return;
-            }
-        }
+        //[Test]
+        //[Ignore("Ignore a test")]
+        //[Repeat(5)]
+        //public void Test()
+        //{
+        //    try
+        //    {
+        //        Status status = dcTests.EMS163();
+        //        Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Debug.WriteLine(ex.ToString());
+        //        TestContext.WriteLine("Error!\r\nDetails: " + ex.Message);
+        //        return;
+        //    }
+        //}
     }
 }
