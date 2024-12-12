@@ -1,21 +1,11 @@
-using PS19.ATM.ReturnStatus;
-using System.Diagnostics;
-using System.IO.MemoryMappedFiles;
 using System.Data.SQLite;
-using System.Text;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Diagnostics;
 
 namespace EMSNUnitTestApp
 {
     [TestFixture]
     public class Main
     {
-        private const string MapName = "TestCommunication";
-        private const string MutexName = "Global\\TestCommunicationMutex";
-        private const string ReadyEventName = "Global\\ClientReadyEvent";
-        private const string TestCasesReadEventName = "Global\\TestCasesReadEvent";
-        private const int BufferSize = 4096;
-
         private const string DatabaseFile = "JenkinsEMSTestDB.sqlite";
         string ConnectionString = "Data Source=JenkinsEMSTestDB.sqlite;Version=3;";
 
@@ -34,7 +24,7 @@ namespace EMSNUnitTestApp
 
             // Step4: Run the EMS Application to execute the test cases
             RunBatScriptWithPsExec();
-
+            Thread.Sleep(10000);
             // Step5: Poll Database after every 5 seconds to get updated step results.
             ServerReporting();
         }
@@ -167,19 +157,21 @@ namespace EMSNUnitTestApp
         {
             try
             {
-                using (var connection = new SQLiteConnection(ConnectionString))
+                string connectionString = $"Data Source={DatabaseFile};Version=3;";
+
+                using (var connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
                     while (true)
                     {
-                        using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
+                        using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection)) 
                         {
                             using (var reader = command.ExecuteReader())
                             {
                                 while (reader.Read())
                                 {
                                     int id = reader.GetInt32(0);
-                                    int testCaseId = reader.GetInt32(1);
+                                    string testCaseId = reader.GetString(1);
                                     string stepDescription = reader.GetString(2);
                                     string result = reader.GetString(3);
 
