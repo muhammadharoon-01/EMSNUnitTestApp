@@ -106,6 +106,12 @@
 		<None Update="EMSProfileDataDNP3.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="ExcelDataReader.DataSet.dll">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="ExcelDataReader.dll">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="iiDCE Sensors Data.xlsx">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

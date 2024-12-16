@@ -26,9 +26,9 @@ namespace EMSNUnitTestApp
 
             // Step4: Run the EMS Application to execute the test cases
             RunBatScriptWithPsExec();
-            Thread.Sleep(60000);
+            Thread.Sleep(5000);
             // Step5: Poll Database after every 5 seconds to get updated step results.
-            //ServerReporting();
+            ServerReporting();
         }
 
         //[Test]
@@ -168,7 +168,7 @@ namespace EMSNUnitTestApp
                     connection.Open();
                     while (true)
                     {
-                        using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection)) 
+                        using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
                         {
                             using (var reader = command.ExecuteReader())
                             {
@@ -178,7 +178,12 @@ namespace EMSNUnitTestApp
                                     string testCaseId = reader.GetString(1);
                                     string stepDescription = reader.GetString(2);
                                     string result = reader.GetString(3);
-
+                                    bool isError = false;
+                                    if (result.Contains("Pass"))
+                                        isError = false;
+                                    else
+                                        isError = false;
+                                    Assert.That(isError, Is.False, $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
                                     Console.WriteLine($"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
                                 }
                             }
