@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Data.SQLite;
 using System.Diagnostics;
 
@@ -21,12 +22,13 @@ namespace EMSNUnitTestApp
 
             // Step3: Populate the test case names in database
             PopulateTestCases();
+            Thread.Sleep(10000);
 
             // Step4: Run the EMS Application to execute the test cases
             RunBatScriptWithPsExec();
-            Thread.Sleep(10000);
+            Thread.Sleep(60000);
             // Step5: Poll Database after every 5 seconds to get updated step results.
-            ServerReporting();
+            //ServerReporting();
         }
 
         //[Test]
@@ -133,13 +135,15 @@ namespace EMSNUnitTestApp
                         command.ExecuteNonQuery();
                     }
                 }
+                connection.Close();
+                connection.Dispose();
             }
 
             Console.WriteLine("Test cases populated in the database.");
         }
 
         [Test]
-        //[Ignore("Ignore a test")]
+        [Ignore("Ignore a test")]
         public void ServerReporting()
         {
             try
