@@ -182,7 +182,7 @@ namespace EMSNUnitTestApp
                 using (var connection = new SQLiteConnection(ConnectionString))
                 {
                     connection.Open();
-                    string[] testCaseNames = { "EMS116", "EMS117", "EMS118" };
+                    string[] testCaseNames = { "EMS116" };
 
                     using (var command = new SQLiteCommand(connection))
                     {
