@@ -11,7 +11,6 @@ namespace EMSNUnitTestApp
         string ConnectionString = "Data Source=JenkinsEMSTestDB.sqlite;Version=3;";
 
         [Test]
-        //[Ignore("Ignore a test")]
         public void TestCases()
         {
             // Step 1: Create the SQLite database file
@@ -219,10 +218,7 @@ namespace EMSNUnitTestApp
             }
             return status;
         }
-
-        //[Test]
-        //[Ignore("Ignore a test")]
-        public void ServerReporting()
+        public Status ServerReporting()
         {
             Status status = new();
             try
@@ -240,8 +236,8 @@ namespace EMSNUnitTestApp
                     ReturnedValue = -1
                 };
             }
+            return status;
         }
-
         private Status PollStepResults()
         {
             Status status = new();
@@ -255,34 +251,40 @@ namespace EMSNUnitTestApp
                     while (true)
                     {
                         // Set the journal mode to WAL
-                        using (var command = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection))
+                        using (var Modecommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection))
                         {
-                            command.ExecuteNonQuery();
-                        }
-                        using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
-                        {
-                            using (var reader = command.ExecuteReader())
+                            Modecommand.ExecuteNonQuery();
+
+                            using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
                             {
-                                while (reader.Read())
+                                using (var reader = command.ExecuteReader())
                                 {
-                                    int id = reader.GetInt32(0);
-                                    string testCaseId = reader.GetString(1);
-                                    string stepDescription = reader.GetString(2);
-                                    string result = reader.GetString(3);
-
-                                    bool isError = false;
-                                    if (result.Contains("Pass"))
-                                        isError = false;
-                                    else
-                                        isError = true;
-
-                                    Assert.That(isError, Is.False, $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
-                                    TestContext.WriteLine($"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
-                                    status = new()
+                                    while (reader.Read())
                                     {
-                                        ErrorOccurred = isError,
-                                        ReturnedMessage = $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'",
-                                    };
+                                        int id = reader.GetInt32(0);
+                                        string testCaseId = reader.GetString(1);
+                                        string stepDescription = reader.GetString(2);
+                                        string result = reader.GetString(3);
+
+                                        bool isError = false;
+                                        if (result.Contains("Pass"))
+                                            isError = false;
+                                        else
+                                            isError = true;
+
+                                        Assert.That(
+                                            isError, 
+                                            Is.False,
+                                            $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
+
+                                        TestContext.WriteLine($"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
+
+                                        status = new()
+                                        {
+                                            ErrorOccurred = isError,
+                                            ReturnedMessage = $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'",
+                                        };
+                                    }
                                 }
                             }
                         }
@@ -302,7 +304,7 @@ namespace EMSNUnitTestApp
                 };
             }
             return status;
-        } 
+        }
         #endregion
 
         DeviceCommandsTests dcTests = new DeviceCommandsTests();
