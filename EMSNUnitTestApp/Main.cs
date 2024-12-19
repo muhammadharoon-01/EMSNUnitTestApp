@@ -259,7 +259,6 @@ namespace EMSNUnitTestApp
                             {
                                 using (var reader = command.ExecuteReader())
                                 {
-                                    bool allStepsCompleted = true; // Flag to check if all steps are completed
                                     while (reader.Read())
                                     {
                                         int id = reader.GetInt32(0);
@@ -285,18 +284,18 @@ namespace EMSNUnitTestApp
                                             ErrorOccurred = isError,
                                             ReturnedMessage = $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'",
                                         };
-                                        // Check if this step is incomplete
-                                        if (result != "Completed") // "Completed" is the status for finished steps
-                                        {
-                                            allStepsCompleted = false;
-                                        }
-                                    }
 
-                                    // If all steps are completed, break the loop
-                                    if (allStepsCompleted)
-                                    {
-                                        Console.WriteLine("All steps completed. Ending polling.");
-                                        break;
+                                        // If all steps are completed, break the loop
+                                        if (stepDescription == "Test Completed")
+                                        {
+                                            TestContext.WriteLine("All steps completed. Ending polling.");
+                                            status = new()
+                                            {
+                                                ErrorOccurred = isError,
+                                                ReturnedMessage = "All steps completed. End polling.",
+                                            };
+                                            break;
+                                        }
                                     }
                                 }
                             }
