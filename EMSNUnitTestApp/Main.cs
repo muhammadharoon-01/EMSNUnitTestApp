@@ -117,17 +117,24 @@ namespace EMSNUnitTestApp
                 using (var connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
+                    using (var transaction = connection.BeginTransaction())
+                    {
+                        // Set the journal mode to WAL
+                        using (var Modecommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection, transaction))
+                        {
+                            Modecommand.ExecuteNonQuery();
+                        }
 
-                    // SQL for creating the TestCases table
-                    string createTestCasesTable = @"
+                        // SQL for creating the TestCases table
+                        string createTestCasesTable = @"
                 CREATE TABLE IF NOT EXISTS TestCases (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Name TEXT NOT NULL,
                     Status TEXT DEFAULT 'Pending'
                 );";
 
-                    // SQL for creating the StepResults table
-                    string createStepResultsTable = @"
+                        // SQL for creating the StepResults table
+                        string createStepResultsTable = @"
                 CREATE TABLE IF NOT EXISTS StepResults (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     TestCaseId TEXT NOT NULL,
@@ -136,29 +143,30 @@ namespace EMSNUnitTestApp
                     FOREIGN KEY (TestCaseId) REFERENCES TestCases(Id)
                 );";
 
-                    // Execute the table creation commands
-                    using (var command = new SQLiteCommand(createTestCasesTable, connection))
-                    {
-                        command.ExecuteNonQuery();
-                        TestContext.WriteLine("Table 'TestCases' created.");
-                        status = new()
+                        // Execute the table creation commands
+                        using (var command = new SQLiteCommand(createTestCasesTable, connection, transaction))
                         {
-                            ErrorOccurred = false,
-                            ReturnedMessage = $"Table 'TestCases' created.",
-                            ReturnedValue = 0
-                        };
-                    }
+                            command.ExecuteNonQuery();
+                            TestContext.WriteLine("Table 'TestCases' created.");
+                            status = new()
+                            {
+                                ErrorOccurred = false,
+                                ReturnedMessage = $"Table 'TestCases' created.",
+                                ReturnedValue = 0
+                            };
+                        }
 
-                    using (var command = new SQLiteCommand(createStepResultsTable, connection))
-                    {
-                        command.ExecuteNonQuery();
-                        TestContext.WriteLine("Table 'StepResults' created.");
-                        status = new()
+                        using (var command = new SQLiteCommand(createStepResultsTable, connection, transaction))
                         {
-                            ErrorOccurred = false,
-                            ReturnedMessage = $"Table 'StepResults' created.",
-                            ReturnedValue = 0
-                        };
+                            command.ExecuteNonQuery();
+                            TestContext.WriteLine("Table 'StepResults' created.");
+                            status = new()
+                            {
+                                ErrorOccurred = false,
+                                ReturnedMessage = $"Table 'StepResults' created.",
+                                ReturnedValue = 0
+                            };
+                        }
                     }
                 }
             }
@@ -182,20 +190,27 @@ namespace EMSNUnitTestApp
                 using (var connection = new SQLiteConnection(ConnectionString))
                 {
                     connection.Open();
-                    string[] testCaseNames = { "EMS116" };
-
-                    using (var command = new SQLiteCommand(connection))
+                    using (var transaction = connection.BeginTransaction())
                     {
-                        command.CommandText = "INSERT INTO TestCases (Name) VALUES (@Name);";
-                        foreach (var name in testCaseNames)
+                        // Set the journal mode to WAL
+                        using (var Modecommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection, transaction))
                         {
-                            command.Parameters.Clear();
-                            command.Parameters.AddWithValue("@Name", name);
-                            command.ExecuteNonQuery();
+                            Modecommand.ExecuteNonQuery();
+                        }
+
+                        string[] testCaseNames = { "EMS116" };
+                        using (var command = new SQLiteCommand(connection))
+                        {
+                            command.CommandText = "INSERT INTO TestCases (Name) VALUES (@Name);";
+                            command.Transaction = transaction;
+                            foreach (var name in testCaseNames)
+                            {
+                                command.Parameters.Clear();
+                                command.Parameters.AddWithValue("@Name", name);
+                                command.ExecuteNonQuery();
+                            }
                         }
                     }
-                    connection.Close();
-                    connection.Dispose();
                 }
 
                 TestContext.WriteLine("Test cases populated in the database.");
@@ -245,17 +260,20 @@ namespace EMSNUnitTestApp
             {
                 string connectionString = $"Data Source={DatabaseFile};Version=3;";
 
-                using (var connection = new SQLiteConnection(connectionString))
+                while (true)
                 {
-                    connection.Open();
-                    while (true)
+                    using (var connection = new SQLiteConnection(connectionString))
                     {
-                        // Set the journal mode to WAL
-                        using (var Modecommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection))
+                        connection.Open();
+                        using (var transaction = connection.BeginTransaction())
                         {
-                            Modecommand.ExecuteNonQuery();
+                            // Set the journal mode to WAL
+                            using (var Modecommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection, transaction))
+                            {
+                                Modecommand.ExecuteNonQuery();
+                            }
 
-                            using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
+                            using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection, transaction))
                             {
                                 using (var reader = command.ExecuteReader())
                                 {
@@ -273,7 +291,7 @@ namespace EMSNUnitTestApp
                                             isError = true;
 
                                         Assert.That(
-                                            isError, 
+                                            isError,
                                             Is.False,
                                             $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
 
@@ -300,9 +318,9 @@ namespace EMSNUnitTestApp
                                 }
                             }
                         }
-
-                        Thread.Sleep(2000); // Poll every second
                     }
+
+                    Thread.Sleep(1000); // Poll every second
                 }
             }
             catch (Exception ex)
