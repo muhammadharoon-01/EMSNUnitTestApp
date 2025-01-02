@@ -13,21 +13,22 @@ namespace EMSNUnitTestApp
         [Test]
         public void TestCases()
         {
+            Status status = new Status();
             // Step 1: Create the SQLite database file
-            CreateDatabaseFile();
+            status = CreateDatabaseFile();
 
             // Step 2: Create the tables
-            CreateTables();
+            status = CreateTables();
 
             // Step3: Populate the test case names in database
-            PopulateTestCases();
+            status = PopulateTestCases();
             Thread.Sleep(10000);
 
             // Step4: Run the EMS Application to execute the test cases
             RunBatScriptWithPsExec();
-            Thread.Sleep(5000);
+            //Thread.Sleep(5000);
             // Step5: Poll Database after every 5 seconds to get updated step results.
-            ServerReporting();
+            //ServerReporting();
         }
         #region Sequence/Common Methods
 
@@ -137,7 +138,7 @@ namespace EMSNUnitTestApp
                         string createStepResultsTable = @"
                 CREATE TABLE IF NOT EXISTS StepResults (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    TestCaseId TEXT NOT NULL,
+                    TestCaseId INTEGER NOT NULL,
                     StepDescription TEXT NOT NULL,
                     Result TEXT NOT NULL,
                     FOREIGN KEY (TestCaseId) REFERENCES TestCases(Id)
@@ -148,40 +149,41 @@ namespace EMSNUnitTestApp
                         {
                             command.ExecuteNonQuery();
                             TestContext.WriteLine("Table 'TestCases' created.");
-                            status = new()
-                            {
-                                ErrorOccurred = false,
-                                ReturnedMessage = $"Table 'TestCases' created.",
-                                ReturnedValue = 0
-                            };
                         }
 
                         using (var command = new SQLiteCommand(createStepResultsTable, connection, transaction))
                         {
                             command.ExecuteNonQuery();
                             TestContext.WriteLine("Table 'StepResults' created.");
-                            status = new()
-                            {
-                                ErrorOccurred = false,
-                                ReturnedMessage = $"Table 'StepResults' created.",
-                                ReturnedValue = 0
-                            };
                         }
+
+                        // Commit the transaction
+                        transaction.Commit();
+
+                        // Return success status
+                        status = new()
+                        {
+                            ErrorOccurred = false,
+                            ReturnedMessage = "Tables created successfully.",
+                            ReturnedValue = 0
+                        };
                     }
                 }
             }
             catch (Exception ex)
             {
-                TestContext.WriteLine($"{ex.Message}");
+                // Log exception and return error status
+                TestContext.WriteLine($"Error: {ex.Message}");
                 status = new()
                 {
                     ErrorOccurred = true,
-                    ReturnedMessage = $"{ex.Message}",
+                    ReturnedMessage = ex.Message,
                     ReturnedValue = -1
                 };
             }
             return status;
         }
+
         private Status PopulateTestCases()
         {
             Status status;
@@ -190,19 +192,23 @@ namespace EMSNUnitTestApp
                 using (var connection = new SQLiteConnection(ConnectionString))
                 {
                     connection.Open();
+
+                    // Set the journal mode to WAL (outside the transaction)
+                    using (var modeCommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection))
+                    {
+                        modeCommand.ExecuteNonQuery();
+                    }
+
                     using (var transaction = connection.BeginTransaction())
                     {
-                        // Set the journal mode to WAL
-                        using (var Modecommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection, transaction))
-                        {
-                            Modecommand.ExecuteNonQuery();
-                        }
-
                         string[] testCaseNames = { "EMS116" };
+
+                        // Insert test cases
                         using (var command = new SQLiteCommand(connection))
                         {
                             command.CommandText = "INSERT INTO TestCases (Name) VALUES (@Name);";
                             command.Transaction = transaction;
+
                             foreach (var name in testCaseNames)
                             {
                                 command.Parameters.Clear();
@@ -210,6 +216,9 @@ namespace EMSNUnitTestApp
                                 command.ExecuteNonQuery();
                             }
                         }
+
+                        // Commit the transaction
+                        transaction.Commit();
                     }
                 }
 
@@ -217,7 +226,7 @@ namespace EMSNUnitTestApp
                 status = new()
                 {
                     ErrorOccurred = false,
-                    ReturnedMessage = $"Test cases populated in the database.",
+                    ReturnedMessage = "Test cases populated in the database.",
                     ReturnedValue = 0
                 };
             }
@@ -231,8 +240,10 @@ namespace EMSNUnitTestApp
                     ReturnedValue = -1
                 };
             }
+
             return status;
         }
+
         public Status ServerReporting()
         {
             Status status = new();
@@ -260,81 +271,77 @@ namespace EMSNUnitTestApp
             {
                 string connectionString = $"Data Source={DatabaseFile};Version=3;";
 
-                while (true)
+                using (var connection = new SQLiteConnection(connectionString))
                 {
-                    using (var connection = new SQLiteConnection(connectionString))
+                    connection.Open();
+
+                    // Enable WAL mode for concurrent access
+                    using (var modeCommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection))
                     {
-                        connection.Open();
-                        using (var transaction = connection.BeginTransaction())
+                        modeCommand.ExecuteNonQuery();
+                    }
+
+                    // Polling loop
+                    while (true)
+                    {
+                        using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
                         {
-                            // Set the journal mode to WAL
-                            using (var Modecommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection, transaction))
+                            using (var reader = command.ExecuteReader())
                             {
-                                Modecommand.ExecuteNonQuery();
-                            }
-
-                            using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection, transaction))
-                            {
-                                using (var reader = command.ExecuteReader())
+                                while (reader.Read())
                                 {
-                                    while (reader.Read())
+                                    int id = reader.GetInt32(0);
+                                    string testCaseId = reader.GetString(1);
+                                    string stepDescription = reader.GetString(2);
+                                    string result = reader.GetString(3);
+
+                                    bool isError = !result.Contains("Pass");
+
+                                    Assert.That(
+                                        isError,
+                                        Is.False,
+                                        $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
+
+                                    TestContext.WriteLine($"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
+
+                                    status = new()
                                     {
-                                        int id = reader.GetInt32(0);
-                                        string testCaseId = reader.GetString(1);
-                                        string stepDescription = reader.GetString(2);
-                                        string result = reader.GetString(3);
+                                        ErrorOccurred = isError,
+                                        ReturnedMessage = $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'"
+                                    };
 
-                                        bool isError = false;
-                                        if (result.Contains("Pass"))
-                                            isError = false;
-                                        else
-                                            isError = true;
-
-                                        Assert.That(
-                                            isError,
-                                            Is.False,
-                                            $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
-
-                                        TestContext.WriteLine($"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
-
+                                    // If "Test Completed" is encountered, exit polling
+                                    if (stepDescription.Equals("Test Completed", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        TestContext.WriteLine("All steps completed. Ending polling.");
                                         status = new()
                                         {
                                             ErrorOccurred = isError,
-                                            ReturnedMessage = $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'",
+                                            ReturnedMessage = "All steps completed. End polling."
                                         };
-
-                                        // If all steps are completed, break the loop
-                                        if (stepDescription == "Test Completed")
-                                        {
-                                            TestContext.WriteLine("All steps completed. Ending polling.");
-                                            status = new()
-                                            {
-                                                ErrorOccurred = isError,
-                                                ReturnedMessage = "All steps completed. End polling.",
-                                            };
-                                            break;
-                                        }
+                                        return status; // Exit the method
                                     }
                                 }
                             }
                         }
-                    }
 
-                    Thread.Sleep(1000); // Poll every second
+                        Thread.Sleep(1000); // Poll every second
+                    }
                 }
             }
             catch (Exception ex)
             {
-                TestContext.WriteLine($"{ex.Message}");
+                TestContext.WriteLine($"Error: {ex.Message}");
                 status = new()
                 {
                     ErrorOccurred = true,
-                    ReturnedMessage = $"{ex.Message}",
+                    ReturnedMessage = ex.Message,
                     ReturnedValue = -1
                 };
             }
             return status;
         }
+
         #endregion
 
         DeviceCommandsTests dcTests = new DeviceCommandsTests();
