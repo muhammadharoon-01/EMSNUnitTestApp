@@ -1,5 +1,6 @@
 using System.Data.SQLite;
 using System.Diagnostics;
+using Assert = NUnit.Framework.Assert;
 using Status = PS19.ATM.ReturnStatus.Status;
 
 namespace EMSNUnitTestApp
@@ -8,341 +9,199 @@ namespace EMSNUnitTestApp
     public class Main
     {
         private const string DatabaseFile = "JenkinsEMSTestDB.sqlite";
-        string ConnectionString = "Data Source=JenkinsEMSTestDB.sqlite;Version=3;";
+        private const string ConnectionString = "Data Source=JenkinsEMSTestDB.sqlite;Version=3;";
 
         [Test]
         public void TestCases()
         {
-            Status status = new Status();
+            Status status;
+
             // Step 1: Create the SQLite database file
             status = CreateDatabaseFile();
+            Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
+
 
             // Step 2: Create the tables
             status = CreateTables();
+            Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
 
-            // Step3: Populate the test case names in database
+            // Step 3: Populate the test case names in the database
             status = PopulateTestCases();
-            Thread.Sleep(10000);
+            Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
 
-            // Step4: Run the EMS Application to execute the test cases
+            Thread.Sleep(5000); // Adjust as needed for timing
+
+            // Step 4: Run the EMS Application to execute the test cases
             RunBatScriptWithPsExec();
-            //Thread.Sleep(5000);
-            // Step5: Poll Database after every 5 seconds to get updated step results.
-            //ServerReporting();
+
+            // Step 5: Poll the database to get updated step results
+            status = PollStepResults();
+            Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
         }
-        #region Sequence/Common Methods
 
-        //[Test]
-        //[Ignore("Ignore a test")]
-        public void RunBatScriptWithPsExec()
+        private void RunBatScriptWithPsExec()
         {
-            // Path to the bat script you want to run
-            string batFilePath = @"psexec-script.bat";
+            string batFilePath = "psexec-script.bat";
 
-            // Set up the process start information
             var processInfo = new ProcessStartInfo
             {
-                FileName = $"{batFilePath}",
+                FileName = batFilePath,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                CreateNoWindow = false
+                CreateNoWindow = true
             };
 
-            // Start the process
             using (var process = new Process { StartInfo = processInfo })
             {
                 process.Start();
 
-                // Capture output and errors if needed
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
 
                 process.WaitForExit();
 
-                // Optionally, you can also verify the output or errors
                 TestContext.WriteLine($"Output: {output}");
                 TestContext.WriteLine($"Error: {error}");
+
+                //Assert.AreEqual(0, process.ExitCode, "Script execution failed.");
             }
         }
-        private static Status CreateDatabaseFile()
+
+        private Status CreateDatabaseFile()
         {
-            Status status;
             try
             {
-                // Check if the file already exists
                 if (!System.IO.File.Exists(DatabaseFile))
                 {
                     SQLiteConnection.CreateFile(DatabaseFile);
-                    TestContext.WriteLine($"Database file '{DatabaseFile}' created.");
-                    status = new()
-                    {
-                        ErrorOccurred = false,
-                        ReturnedMessage = $"Database file '{DatabaseFile}' created.",
-                        ReturnedValue = 0
-                    };
+                    return new Status { ErrorOccurred = false, ReturnedMessage = "Database file created." };
                 }
-                else
-                {
-                    TestContext.WriteLine($"Database file '{DatabaseFile}' already exists.");
-                    Console.WriteLine($"Database file '{DatabaseFile}' already exists.");
-                    status = new()
-                    {
-                        ErrorOccurred = true,
-                        ReturnedMessage = $"Database file '{DatabaseFile}' already exists.",
-                        ReturnedValue = -1
-                    };
-                }
+                return new Status { ErrorOccurred = false, ReturnedMessage = "Database file already exists." };
             }
             catch (Exception ex)
             {
-                TestContext.WriteLine($"{ex.Message}");
-                status = new()
-                {
-                    ErrorOccurred = true,
-                    ReturnedMessage = $"{ex.Message}",
-                    ReturnedValue = -1
-                };
-
+                return new Status { ErrorOccurred = true, ReturnedMessage = ex.Message };
             }
-            return status;
-        }
-        private static Status CreateTables()
-        {
-            Status status;
-            try
-            {
-                // Connection string to the database
-                string connectionString = $"Data Source={DatabaseFile};Version=3;";
-
-                using (var connection = new SQLiteConnection(connectionString))
-                {
-                    connection.Open();
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        // Set the journal mode to WAL
-                        using (var Modecommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection, transaction))
-                        {
-                            Modecommand.ExecuteNonQuery();
-                        }
-
-                        // SQL for creating the TestCases table
-                        string createTestCasesTable = @"
-                CREATE TABLE IF NOT EXISTS TestCases (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Name TEXT NOT NULL,
-                    Status TEXT DEFAULT 'Pending'
-                );";
-
-                        // SQL for creating the StepResults table
-                        string createStepResultsTable = @"
-                CREATE TABLE IF NOT EXISTS StepResults (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    TestCaseId INTEGER NOT NULL,
-                    StepDescription TEXT NOT NULL,
-                    Result TEXT NOT NULL,
-                    FOREIGN KEY (TestCaseId) REFERENCES TestCases(Id)
-                );";
-
-                        // Execute the table creation commands
-                        using (var command = new SQLiteCommand(createTestCasesTable, connection, transaction))
-                        {
-                            command.ExecuteNonQuery();
-                            TestContext.WriteLine("Table 'TestCases' created.");
-                        }
-
-                        using (var command = new SQLiteCommand(createStepResultsTable, connection, transaction))
-                        {
-                            command.ExecuteNonQuery();
-                            TestContext.WriteLine("Table 'StepResults' created.");
-                        }
-
-                        // Commit the transaction
-                        transaction.Commit();
-
-                        // Return success status
-                        status = new()
-                        {
-                            ErrorOccurred = false,
-                            ReturnedMessage = "Tables created successfully.",
-                            ReturnedValue = 0
-                        };
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log exception and return error status
-                TestContext.WriteLine($"Error: {ex.Message}");
-                status = new()
-                {
-                    ErrorOccurred = true,
-                    ReturnedMessage = ex.Message,
-                    ReturnedValue = -1
-                };
-            }
-            return status;
         }
 
-        private Status PopulateTestCases()
+        private Status CreateTables()
         {
-            Status status;
             try
             {
                 using (var connection = new SQLiteConnection(ConnectionString))
                 {
                     connection.Open();
 
-                    // Set the journal mode to WAL (outside the transaction)
-                    using (var modeCommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection))
-                    {
-                        modeCommand.ExecuteNonQuery();
-                    }
+                    string createTestCasesTable = @"
+                    CREATE TABLE IF NOT EXISTS TestCases (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Name TEXT NOT NULL,
+                        Status TEXT DEFAULT 'Pending'
+                    );";
 
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        string[] testCaseNames = { "EMS116" };
+                    string createStepResultsTable = @"
+                    CREATE TABLE IF NOT EXISTS StepResults (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        TestCaseId INTEGER NOT NULL,
+                        StepDescription TEXT NOT NULL,
+                        Result TEXT NOT NULL,
+                        FOREIGN KEY (TestCaseId) REFERENCES TestCases(Id)
+                    );";
 
-                        // Insert test cases
-                        using (var command = new SQLiteCommand(connection))
-                        {
-                            command.CommandText = "INSERT INTO TestCases (Name) VALUES (@Name);";
-                            command.Transaction = transaction;
+                    ExecuteNonQuery(connection, createTestCasesTable);
+                    ExecuteNonQuery(connection, createStepResultsTable);
 
-                            foreach (var name in testCaseNames)
-                            {
-                                command.Parameters.Clear();
-                                command.Parameters.AddWithValue("@Name", name);
-                                command.ExecuteNonQuery();
-                            }
-                        }
-
-                        // Commit the transaction
-                        transaction.Commit();
-                    }
+                    return new Status { ErrorOccurred = false, ReturnedMessage = "Tables created successfully." };
                 }
-
-                TestContext.WriteLine("Test cases populated in the database.");
-                status = new()
-                {
-                    ErrorOccurred = false,
-                    ReturnedMessage = "Test cases populated in the database.",
-                    ReturnedValue = 0
-                };
             }
             catch (Exception ex)
             {
-                TestContext.WriteLine($"{ex.Message}");
-                status = new()
-                {
-                    ErrorOccurred = true,
-                    ReturnedMessage = $"{ex.Message}",
-                    ReturnedValue = -1
-                };
+                return new Status { ErrorOccurred = true, ReturnedMessage = ex.Message };
             }
-
-            return status;
         }
 
-        public Status ServerReporting()
+        private Status PopulateTestCases()
         {
-            Status status = new();
             try
             {
-                //Continuously receive results from the client
-                status = PollStepResults();
-            }
-            catch (Exception ex)
-            {
-                TestContext.WriteLine($"Server error: {ex.Message}");
-                status = new()
-                {
-                    ErrorOccurred = true,
-                    ReturnedMessage = $"Server error: {ex.Message}",
-                    ReturnedValue = -1
-                };
-            }
-            return status;
-        }
-        private Status PollStepResults()
-        {
-            Status status = new();
-            try
-            {
-                string connectionString = $"Data Source={DatabaseFile};Version=3;";
-
-                using (var connection = new SQLiteConnection(connectionString))
+                using (var connection = new SQLiteConnection(ConnectionString))
                 {
                     connection.Open();
 
-                    // Enable WAL mode for concurrent access
-                    using (var modeCommand = new SQLiteCommand("PRAGMA journal_mode=WAL;", connection))
+                    string insertTestCase = "INSERT INTO TestCases (Name) VALUES (@Name);";
+
+                    using (var command = new SQLiteCommand(insertTestCase, connection))
                     {
-                        modeCommand.ExecuteNonQuery();
+                        command.Parameters.AddWithValue("@Name", "EMS116");
+                        command.ExecuteNonQuery();
                     }
 
-                    // Polling loop
-                    while (true)
+                    return new Status { ErrorOccurred = false, ReturnedMessage = "Test cases populated in the database." };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Status { ErrorOccurred = true, ReturnedMessage = ex.Message };
+            }
+        }
+
+        private Status PollStepResults()
+        {
+            try
+            {
+                using (var connection = new SQLiteConnection(ConnectionString))
+                {
+                    connection.Open();
+
+                    using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
                     {
-                        using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
+                        while (true)
                         {
                             using (var reader = command.ExecuteReader())
                             {
                                 while (reader.Read())
                                 {
                                     int id = reader.GetInt32(0);
-                                    string testCaseId = reader.GetString(1);
-                                    string stepDescription = reader.GetString(2);
-                                    string result = reader.GetString(3);
+                                    string testCaseId = reader["TestCaseId"].ToString();
+                                    string stepDescription = reader["StepDescription"].ToString();
+                                    string result = reader["Result"].ToString();
 
-                                    bool isError = !result.Contains("Pass");
+                                    Assert.That(result.Contains("Fail"), Is.False, $"Test failed: {stepDescription}");
 
-                                    Assert.That(
-                                        isError,
-                                        Is.False,
-                                        $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
-
-                                    TestContext.WriteLine($"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'");
-
-                                    status = new()
-                                    {
-                                        ErrorOccurred = isError,
-                                        ReturnedMessage = $"Step Result: TestCaseId={testCaseId}, Step='{stepDescription}', Result='{result}'"
-                                    };
-
-                                    // If "Test Completed" is encountered, exit polling
                                     if (stepDescription.Equals("Test Completed", StringComparison.OrdinalIgnoreCase))
                                     {
                                         TestContext.WriteLine("All steps completed. Ending polling.");
-                                        status = new()
-                                        {
-                                            ErrorOccurred = isError,
-                                            ReturnedMessage = "All steps completed. End polling."
-                                        };
-                                        return status; // Exit the method
+                                        return new Status { ErrorOccurred = false, ReturnedMessage = "All steps completed." };
                                     }
                                 }
                             }
+                            Thread.Sleep(5000); // Adjust polling interval as needed
                         }
-
-                        Thread.Sleep(1000); // Poll every second
                     }
                 }
             }
             catch (Exception ex)
             {
-                TestContext.WriteLine($"Error: {ex.Message}");
-                status = new()
-                {
-                    ErrorOccurred = true,
-                    ReturnedMessage = ex.Message,
-                    ReturnedValue = -1
-                };
+                return new Status { ErrorOccurred = true, ReturnedMessage = ex.Message };
             }
-            return status;
+        }
+        
+
+        private void ExecuteNonQuery(SQLiteConnection connection, string query)
+        {
+            using (var command = new SQLiteCommand(query, connection))
+            {
+                command.ExecuteNonQuery();
+            }
         }
 
-        #endregion
+        private class Status
+        {
+            public bool ErrorOccurred { get; set; }
+            public string ReturnedMessage { get; set; }
+        }
+
 
         DeviceCommandsTests dcTests = new DeviceCommandsTests();
 
