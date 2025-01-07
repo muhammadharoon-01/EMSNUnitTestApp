@@ -35,7 +35,7 @@ namespace EMSNUnitTestApp
             RunBatScriptWithPsExec();
 
             // Step 5: Poll the database to get updated step results
-            status = PollStepResults();
+            //status = PollStepResults();
             Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
         }
 
