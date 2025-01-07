@@ -25,11 +25,22 @@ namespace EMSNUnitTestApp
             status = CreateTables();
             Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
 
+            for (int i = 0; i < 3; i++)
+            {
+                if (!DoesTableExist("TestCases"))
+                {
+                    //throw new Exception("Table 'TestCases' does not exist after creation.");
+                    Console.WriteLine("Table 'TestCases' does not exist after creation.");
+                    Thread.Sleep(1000);
+                }
+                else
+                    break;
+            }
             // Step 3: Populate the test case names in the database
             status = PopulateTestCases();
             Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
 
-            Thread.Sleep(5000); // Adjust as needed for timing
+            Thread.Sleep(10000); // Adjust as needed for timing
 
             // Step 4: Run the EMS Application to execute the test cases
             RunBatScriptWithPsExec();
@@ -37,6 +48,19 @@ namespace EMSNUnitTestApp
             // Step 5: Poll the database to get updated step results
             //status = PollStepResults();
             Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
+        }
+        private bool DoesTableExist(string tableName)
+        {
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                connection.Open();
+                string query = $"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}';";
+                using (var command = new SQLiteCommand(query, connection))
+                {
+                    var result = command.ExecuteScalar();
+                    return result != null;
+                }
+            }
         }
 
         private void RunBatScriptWithPsExec()
@@ -186,7 +210,6 @@ namespace EMSNUnitTestApp
                 return new Status { ErrorOccurred = true, ReturnedMessage = ex.Message };
             }
         }
-        
 
         private void ExecuteNonQuery(SQLiteConnection connection, string query)
         {
