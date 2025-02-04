@@ -56,6 +56,7 @@
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.WindowsDesktop.App" />
+		<PackageReference Include="Allure.NUnit" Version="2.12.1" />
 		<PackageReference Include="coverlet.collector" Version="6.0.3">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
