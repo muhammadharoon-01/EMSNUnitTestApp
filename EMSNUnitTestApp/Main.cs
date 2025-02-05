@@ -38,8 +38,9 @@ namespace EMSNUnitTestApp
                 else
                     break;
             }
+
             // Step 3: Populate the test case names in the database
-            status = PollStepResults();
+            status = PopulateTestCases();
             Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
 
             Thread.Sleep(10000); // Adjust as needed for timing
@@ -48,7 +49,10 @@ namespace EMSNUnitTestApp
             RunBatScriptWithPsExec();
 
             // Step 5: Poll the database to get updated step results
-            //status = PollStepResults();
+            //status = Test_PollStepResults();
+            Thread.Sleep(50000); // Adjust as needed for timing
+
+            Test_PollStepResults();
             Assert.That(status.ErrorOccurred, Is.False, status.ReturnedMessage);
         }
         private bool DoesTableExist(string tableName)
@@ -147,16 +151,53 @@ namespace EMSNUnitTestApp
             }
         }
 
-        [Test]
-        [Ignore("Ignore a test")]
-        [AllureFeature("Polling Steps Report")]
+        private Status PopulateTestCases()
+        {
+            Status status;
+            try
+            {
+                using (var connection = new SQLiteConnection(ConnectionString))
+                {
+                    connection.Open();
+
+                    string[] testCaseNames = { "EMS116" };
+
+                    // Insert test cases
+                    using (var command = new SQLiteCommand(connection))
+                    {
+                        command.CommandText = "INSERT INTO TestCases (Name) VALUES (@Name);";
+
+                        foreach (var name in testCaseNames)
+                        {
+                            command.Parameters.Clear();
+                            command.Parameters.AddWithValue("@Name", name);
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                TestContext.WriteLine("Test cases populated in the database.");
+                return new Status { ErrorOccurred = false, ReturnedMessage = "Test cases populated in the database." };
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine($"{ex.Message}");
+                return new Status { ErrorOccurred = true, ReturnedMessage = ex.Message };
+            }
+
+            return status;
+        }
+
+        //[Test]
+        //[Ignore("Ignore a test")]
+        //[AllureFeature("Polling Steps Report")]
         public void Test_PollStepResults()
         {
             var status = PollStepResults();
             //Assert.IsFalse(status.ErrorOccurred, $"Test failed: {status.ReturnedMessage}");
         }
 
-        [AllureStep("Polling database for step results")]
+        //[AllureStep("Polling database for step results")]
         private Status PollStepResults()
         {
             try
@@ -164,6 +205,7 @@ namespace EMSNUnitTestApp
                 using (var connection = new SQLiteConnection(ConnectionString))
                 {
                     connection.Open();
+
                     using (var command = new SQLiteCommand("SELECT * FROM StepResults", connection))
                     {
                         while (true)
@@ -172,55 +214,78 @@ namespace EMSNUnitTestApp
                             {
                                 while (reader.Read())
                                 {
+                                    int id = reader.GetInt32(0);
                                     string testCaseId = reader["TestCaseId"].ToString();
                                     string stepDescription = reader["StepDescription"].ToString();
                                     string result = reader["Result"].ToString();
 
-                                    if (result.Contains("Fail", StringComparison.OrdinalIgnoreCase))
+                                    string stepUuid = Guid.NewGuid().ToString();
+
+                                    // Start Allure step
+                                    var stepResult = AllureLifecycle.Instance.StartStep(new StepResult
                                     {
-                                        string failureMessage = $"Test Case {testCaseId} failed at step: {stepDescription}";
+                                        name = stepDescription,
+                                        status = Allure.Net.Commons.Status.none // Default status
+                                    });
 
-                                        AllureLifecycle.Instance.UpdateTestCase(tc =>
-                                            tc.steps.Add(new StepResult
-                                            {
-                                                name = stepDescription,
-                                                status = Allure.Net.Commons.Status.failed,
-                                                statusDetails = new StatusDetails { message = failureMessage }
-                                            }));
+                                    try
+                                    {
+                                        if (result.Contains("Fail"))
+                                        {
+                                            throw new Exception($"Test failed: {stepDescription}");
+                                        }
 
-                                        TestContext.Progress.WriteLine(failureMessage);
-                                        Assert.Fail(failureMessage);
+                                        // Mark step as passed
+                                        AllureLifecycle.Instance.UpdateStep(stepResult =>
+                                        {
+                                            stepResult.status = Allure.Net.Commons.Status.passed;
+                                        });
+
+                                        TestContext.WriteLine($"Step Passed: {stepDescription}");
                                     }
-                                    else
+                                    catch (Exception ex)
                                     {
-                                        AllureLifecycle.Instance.UpdateTestCase(tc =>
-                                            tc.steps.Add(new StepResult
-                                            {
-                                                name = stepDescription,
-                                                status = Allure.Net.Commons.Status.passed
-                                            }));
+                                        // Mark step as failed
+                                        AllureLifecycle.Instance.UpdateStep(stepResult =>
+                                        {
+                                            stepResult.status = Allure.Net.Commons.Status.failed;
+                                            stepResult.statusDetails = new StatusDetails { message = ex.Message };
+                                        });
 
-                                        TestContext.Progress.WriteLine($"Step Passed: {stepDescription}");
+                                        throw; // Re-throw to fail test
+                                    }
+                                    finally
+                                    {
+                                        // Stop the Allure step
+                                        AllureLifecycle.Instance.StopStep(stepResult =>
+                                        {
+                                            stepResult.status = Allure.Net.Commons.Status.none;
+                                        });
                                     }
 
                                     if (stepDescription.Equals("Test Completed", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        TestContext.Progress.WriteLine("All steps completed. Ending polling.");
+                                        TestContext.WriteLine("All steps completed. Ending polling.");
                                         return new Status { ErrorOccurred = false, ReturnedMessage = "All steps completed." };
                                     }
                                 }
                             }
-                            Thread.Sleep(5000);
+                            Thread.Sleep(5000); // Adjust polling interval as needed
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                AllureLifecycle.Instance.UpdateTestCase(tc => tc.status = Allure.Net.Commons.Status.broken);
+                Console.WriteLine($"Exception: {ex.Message}");
+                Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
                 return new Status { ErrorOccurred = true, ReturnedMessage = ex.Message };
             }
         }
+
+
 
         [AllureStep("Capture failure screenshot")]
         private string CaptureScreenshot()
